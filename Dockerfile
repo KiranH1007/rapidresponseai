@@ -13,6 +13,9 @@ COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
 # Stage 2: Production image
+FROM node:20-alpine
+WORKDIR /app
+
 # Copy installed dependencies from the 'deps' stage.
 COPY --from=deps /app/node_modules ./node_modules
 
