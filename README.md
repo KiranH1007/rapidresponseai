@@ -51,11 +51,29 @@ The deployment involved resolving several common conflicts between front-end bui
 
 ## ⚙️ Technical Architecture & Setup
 
-### Deployment Stack
-* **Deployment Target:** **Google Cloud Run** (Managed Service) for serverless hosting.
-* **Build System:** Multi-stage **`Dockerfile`** and **Google Cloud Build**.
-* **Package Manager:** **pnpm** (with **`pnpm-lock.yaml`** committed for deterministic builds).
-* **Key Security:** **Google Secret Manager** securely injects the `API_KEY` at the Cloud Run runtime using the `--set-secrets` flag.
+**1. ⚙️ Deployment Flow (Build and Setup)**
+
+This flow details how the application is built, secured, and deployed on Google Cloud.
+
+| Component | Role | Action/Interaction |
+| :--- | :--- | :--- |
+| **SourceRepository** | Stores application code | Code is pulled by Cloud Build upon trigger. |
+| **Google Cloud Build** | CI/CD Orchestration | Runs docker build (multi-stage) and pushes the final container image. |
+| **Google Artifact Registry** | Container Image Storage | Stores the rapid-response-ai:latest image, acting as the source for Cloud Run. |
+| **Google Secret Manager** | Key Security | Securely stores the gemini-api-key and provides it to Cloud Run at container startup. | 
+| **Google Cloud Run** | Frontend Hosting (Serverless) | Deploys the container image, retrieves the secret, and serves the application. |
+
+**2. ⚡ Runtime Flow (User Interaction and Analysis)**
+
+   This flow details the path a user's emergency request takes from the browser to the AI and back.
+
+| Step | Component | Action |
+| :--- | :--- | :--- |
+| **1. User Interaction** | Browser (Client Application)| User fills out an Emergency Report (Text, Image, Location) and sends the Multimodal Request to the Cloud Run service URL. |
+| **2. Secure Relay** | Google Cloud Run (Frontend Service) | Receives the request. It uses the securely injected API_KEY (from Secret Manager) to authenticate the request before forwarding it. |
+| **3. AI Processing** | Google Gemini API | Processes the request using the gemini-2.5-flash model. It uses the defined systemInstruction and responseSchema to return a Structured JSON Analysis. |
+| **4. Data Return** | Google Cloud Run (Frontend Service) | Relays the AI's Structured JSON Analysis back to the client. | 
+| **5. Display Results** | Browser (Client Application) | Displays the Analysis Results (Severity Assessment, Actionable Advice, Nearby Hospitals) and manages follow-up chat. |
 
 ### Run Locally
 
@@ -65,18 +83,30 @@ The deployment involved resolving several common conflicts between front-end bui
     ```bash
     pnpm install
     ```
-2.  **Set the API Key:**
+2.  **Build the docker image locally:**
+   
+    To successfully build the image locally
+    ```bash
+    # Build the dockerfile 
+    docker build  -t rapidresponseai .
+    ```
+    
+3. **Run the docker locally:**
+   
     To successfully run locally, you must pass your Gemini API Key as an environment variable to prevent the application from crashing during initialization.
-
     ```bash
     # Run the application in the Docker container for local testing
     docker run -p 3001:3001 --rm -e API_KEY="YOUR_ACTUAL_GEMINI_API_KEY" rapidresponseai
     ```
-3.  **Run the app (Development Mode):**
-    ```bash
-    pnpm run dev
+    
+4.  **Test the docker container which is running the application:**
+   
+     Application should now be running. You can access it in with browser or via curl
+     ```bash
+    # Using curl in terminal
+    curl http://localhost:3001
     ```
-
+     
 ---
 
 ## 💡 Conclusion: Empowering the User
@@ -89,4 +119,4 @@ When a user interacts with the final application interface—**inputting data an
 
 ## 📜 License
 
-This project is licensed under the **MIT License**.
+MIT License – See [LICENSE](https://github.com/KiranH1007/rapidresponseai/tree/main?tab=MIT-1-ov-file#MIT-1-ov-file)
