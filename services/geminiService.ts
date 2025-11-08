@@ -1,12 +1,13 @@
 import { GoogleGenAI, Type, Chat } from "@google/genai";
 import type { AnalysisResult, Location, ChatMessage } from '../types';
 
-const API_KEY = import.meta.env.VITE_API_KEY;
+// On the server (Cloud Run), get the API key from process.env
+const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
     throw new Error("API_KEY environment variable is not set.");
 }
-
+// Initialize the client with the API key
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 const fileToGenerativePart = async (file: File) => {
