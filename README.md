@@ -2,7 +2,7 @@
 
 The AI-powered emergency assistance tool offers immediate, structured analysis of accident scenes—analyzing text and images via the Google Gemini API—from a robust, serverless React/TypeScript frontend, to instantly provide severity assessment, actionable advice, and locate nearby hospitals.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1O9LowMYc6D-Glsu06gXrlWcuXV9A1eVR
+View your app in [AI Studio](https://ai.studio/apps/drive/1O9LowMYc6D-Glsu06gXrlWcuXV9A1eVR)
 
 ---
 
