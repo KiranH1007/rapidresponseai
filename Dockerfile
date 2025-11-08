@@ -19,4 +19,4 @@ EXPOSE 3000
 
 # The command to run when the container starts
 # This will serve all files in the current directory
-CMD [ "npx", "serve", "-s", ".", "-l", "3000" ]
+CMD [ "npx", "serve", "-s", "build", "-l", "3000" ]
