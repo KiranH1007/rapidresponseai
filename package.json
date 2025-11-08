@@ -9,8 +9,7 @@
     "serve": "^14.2.3"
   },
   "scripts": {
-    "start": "serve -s build",
-    "start": "serve -s .",
+    "start": "serve -s build -l 8080",
     "build": "echo 'No build step configured for this project structure.' && exit 0"
   },
   "eslintConfig": {
