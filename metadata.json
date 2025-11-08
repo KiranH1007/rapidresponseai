@@ -1,0 +1,7 @@
+{
+  "name": "rapidresponseai",
+  "description": "An AI-powered emergency assistance tool that analyzes accident scenes using text and images to provide immediate severity assessment, actionable advice, and locates nearby hospitals.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
