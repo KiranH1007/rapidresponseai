@@ -1,10 +1,20 @@
-import React, { useState, useCallback, ChangeEvent } from 'react';
+import React, { useState, useCallback, ChangeEvent, useRef, useEffect } from 'react';
 import type { Location } from '../types';
 import { CameraIcon } from './icons/CameraIcon';
 import { MapPinIcon } from './icons/MapPinIcon';
+import { MicrophoneIcon } from './icons/MicrophoneIcon';
 
 interface EmergencyFormProps {
   onSubmit: (description: string, image: File | null, location: Location | null) => void;
+}
+
+// Check for SpeechRecognition API
+const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+if (recognition) {
+    recognition.continuous = true;
+    recognition.interimResults = true;
 }
 
 export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
@@ -14,6 +24,49 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
   const [location, setLocation] = useState<Location | null>(null);
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const recognitionRef = useRef(recognition);
+
+  useEffect(() => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+
+    rec.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        // To prevent updating state on every single result, we could debounce or use a different strategy
+        // But for live feedback, this is okay. We'll append the final transcript.
+        // For simplicity, we'll just update with the final part. A better implementation might handle the cursor position.
+        setDescription(prev => prev + finalTranscript);
+    };
+
+    rec.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+    };
+    
+    rec.onend = () => {
+        setIsListening(false);
+    }
+
+  }, []);
+
+  const toggleListen = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+    setIsListening(!isListening);
+  }
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -53,19 +106,29 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
         <p className="mt-2 text-slate-400">Describe the situation. The AI will assess and guide you.</p>
       </div>
 
-      <div>
+      <div className="relative">
         <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
           1. Describe the incident
         </label>
         <textarea
           id="description"
           rows={5}
-          className="w-full bg-slate-700 border border-slate-600 rounded-md p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors"
+          className="w-full bg-slate-700 border border-slate-600 rounded-md p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors pr-10"
           placeholder="e.g., 'Car accident on the highway, one person seems injured and is not moving. The car is smoking.'"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
         ></textarea>
+        {recognition && (
+            <button 
+                type="button" 
+                onClick={toggleListen}
+                className={`absolute top-10 right-2 p-1 rounded-full transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-cyan-300'}`}
+                aria-label={isListening ? 'Stop listening' : 'Start listening'}
+            >
+                <MicrophoneIcon className="h-6 w-6" />
+            </button>
+        )}
       </div>
 
       <div>

@@ -33,11 +33,16 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ history, onSendMessa
                 {history.map((msg, index) => (
                     <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl ${msg.role === 'user' ? 'bg-cyan-600 text-white' : 'bg-slate-700 text-slate-200'}`}>
-                           <p className="text-sm">{msg.text}</p>
+                           <p className="text-sm whitespace-pre-wrap">
+                                {msg.text}
+                                {msg.role === 'model' && isLoading && index === history.length - 1 && (
+                                    <span className="inline-block w-2 h-4 bg-slate-400 ml-1 animate-pulse align-bottom" style={{ animationDuration: '1s' }}></span>
+                                )}
+                            </p>
                         </div>
                     </div>
                 ))}
-                {isLoading && (
+                {isLoading && history[history.length - 1]?.role !== 'model' && (
                     <div className="flex justify-start">
                          <div className="max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl bg-slate-700 text-slate-200">
                            <div className="flex items-center space-x-2">

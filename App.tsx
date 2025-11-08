@@ -54,25 +54,41 @@ const App: React.FC = () => {
   }, []);
 
   const handleSendMessage = useCallback(async (message: string) => {
-    if (!chatSession) return;
+    if (!chatSession || isChatLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', text: message };
-    setChatHistory(prev => [...prev, userMessage]);
+    const modelPlaceholder: ChatMessage = { role: 'model', text: '' };
+    setChatHistory(prev => [...prev, userMessage, modelPlaceholder]);
     setIsChatLoading(true);
 
     try {
-      // FIX: The sendMessage method expects an object with a 'message' property.
-      const response = await chatSession.sendMessage({ message });
-      const modelMessage: ChatMessage = { role: 'model', text: response.text };
-      setChatHistory(prev => [...prev, modelMessage]);
+      const responseStream = await chatSession.sendMessageStream({ message });
+
+      let fullResponseText = "";
+      for await (const chunk of responseStream) {
+        fullResponseText += chunk.text;
+        setChatHistory(prev => {
+          const newHistory = [...prev];
+          if (newHistory.length > 0) {
+              newHistory[newHistory.length - 1].text = fullResponseText;
+          }
+          return newHistory;
+        });
+      }
     } catch (err) {
       console.error("Failed to send chat message:", err);
-      const errorMessage: ChatMessage = { role: 'model', text: "Sorry, I encountered an error. Please try again." };
-      setChatHistory(prev => [...prev, errorMessage]);
+      const errorMessage = "Sorry, I encountered an error. Please try again.";
+      setChatHistory(prev => {
+          const newHistory = [...prev];
+          if (newHistory.length > 0) {
+              newHistory[newHistory.length - 1].text = errorMessage;
+          }
+          return newHistory;
+      });
     } finally {
         setIsChatLoading(false);
     }
-  }, [chatSession]);
+  }, [chatSession, isChatLoading]);
 
   const renderContent = () => {
     if (view === View.INFO) {
