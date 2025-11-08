@@ -1,6 +1,6 @@
 # 🚨 Rapid Response AI: Multimodal Emergency Incident Analyzer
 
-A robust, serverless frontend application built with **React** and **TypeScript**, engineered to provide immediate, structured, and multi-modal analysis of emergency situations using the **Google Gemini API**.
+The AI-powered emergency assistance tool offers immediate, structured analysis of accident scenes—analyzing text and images via the Google Gemini API—from a robust, serverless React/TypeScript frontend, to instantly provide severity assessment, actionable advice, and locate nearby hospitals.
 
 View your app in AI Studio: https://ai.studio/apps/drive/1O9LowMYc6D-Glsu06gXrlWcuXV9A1eVR
 
