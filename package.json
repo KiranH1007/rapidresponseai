@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "serve -s build",
+    "start": "serve -s .",
     "build": "echo 'No build step configured for this project structure.' && exit 0"
   },
   "eslintConfig": {
