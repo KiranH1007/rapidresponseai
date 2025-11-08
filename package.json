@@ -10,12 +10,14 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
+    "@types/node": "^20.14.12",
     "typescript": "^5.5.4",
     "vite": "^5.4.0"
   },
   "scripts": {
-    "start": "vite",
+    "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "serve -s dist -l tcp://0.0.0.0:3001"
   }
 }
