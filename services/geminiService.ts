@@ -1,15 +1,6 @@
 import { GoogleGenAI, Type, Chat } from "@google/genai";
 import type { AnalysisResult, Location, ChatMessage } from '../types';
 
-// On the server (Cloud Run), get the API key from process.env
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
-}
-// Initialize the client with the API key
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -29,7 +20,17 @@ export const startAnalysisChat = async (
   description: string,
   image: File | null,
   location: Location
-): Promise<{ analysis: AnalysisResult; chat: Chat; initialHistory: ChatMessage[] }> => {
+): Promise<{ analysis: AnalysisResult; chat: Chat; initialHistory: ChatMessage[] } | null> => {
+  // Get the API key from environment variables when the function is called.
+  const API_KEY = process.env.API_KEY || process.env.GOOGLE_API_KEY;
+  if (!API_KEY) {
+      console.error("API_KEY environment variable is not set. Skipping Gemini analysis.");
+      return null;
+  }
+
+  // Initialize the client here, only when it's needed.
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   const model = "gemini-2.5-flash";
   const systemInstruction = "You are an AI assistant for emergency situations. First, analyze the accident report to assess severity, provide a summary for emergency services, suggest immediate actions, and identify nearby hospitals, returning this as a JSON object. After that, answer follow-up questions helpfully and concisely. Prioritize safety and clarity.";
 
@@ -113,6 +114,8 @@ export const startAnalysisChat = async (
     return { analysis: result, chat, initialHistory };
   } catch (error) {
     console.error("Gemini API call failed:", error);
-    throw new Error("Failed to get a valid analysis from the AI. The model may be overloaded or the input is invalid.");
+    //throw new Error("Failed to get a valid analysis from the AI. The model may be overloaded or the input is invalid.");
+    // Instead of throwing an error, return null for any failure.
+    return null;
   }
 };

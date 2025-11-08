@@ -2,6 +2,7 @@
   "name": "rapid-response-ai",
   "version": "1.0.0",
   "private": true,
+  "homepage": "./",
   "dependencies": {
     "@google/genai": "^1.29.0",
     "react": "^19.2.0",
