@@ -27,7 +27,7 @@ The system categorizes incidents into four severity levels with color-coded visu
 ### Prioritized Action Items
 Every analysis includes a **prioritized, actionable checklist** that guides responders through critical steps in order of importance:
 1. **Immediate Safety** - Secure the scene and protect lives
-2. **Emergency Services** - Contact appropriate responders (911, fire, police, medical)
+2. **Emergency Services** - Contact appropriate responders with **location-aware emergency numbers** (911 for USA, 108 for India, 999 for UK, etc.)
 3. **Stabilization** - Basic first aid and scene management
 4. **Resource Coordination** - Connect with nearby emergency facilities
 
@@ -36,6 +36,7 @@ Every analysis includes a **prioritized, actionable checklist** that guides resp
 - 📸 **Image Recognition** - Visual analysis of photos to assess damage, injuries, and scene conditions
 - 📍 **Geolocation Intelligence** - Automatic detection of nearby emergency resources based on incident type
 - 🗣️ **Voice Input** - Speech-to-text for hands-free reporting in high-stress situations
+- 🌍 **Location-Aware Emergency Numbers** - Automatically suggests the correct emergency number based on user's location (911 for USA, 108 for India, 999 for UK, 112 for EU, etc.)
 
 ### Real-Time Resource Discovery
 Automatically locates and provides direct navigation links to:
@@ -62,7 +63,8 @@ The application's interface guides the user through three simple steps (as seen 
 ### Enhanced User Features
 
 * **Accessibility:** **Speech-to-Text** integration allows users to dictate incident descriptions, which is vital in high-stress scenarios.
-* **Real-time Feedback:** **Streaming Chat Responses** provide immediate, token-by-token feedback during follow-up conversations.
+* **Real-time Feedback:** **Streaming Chat Responses** provide immediate, token-by-token feedback during follow-up conversations with natural language responses (not JSON).
+* **Location-Aware Emergency Numbers:** Automatically provides country-specific emergency numbers (911 for USA, 108 for India, 999 for UK, etc.) based on user's geolocation.
 * **Quick Actions:** Features **One-Click Map Links** for instant hospital navigation and a **Copy Summary Button** for quickly sharing critical information.
 
 ---
@@ -82,7 +84,7 @@ The application bundles the user's text, image, and location and sends it to the
    - **Prioritized Action List** - Ordered steps for immediate response (3-5 critical actions)
    - **Resource Type** - Intelligent determination of needed services (Hospital, Fire_Rescue, Police, Ambulance)
    - **Nearby Resources** - Location-based emergency facility discovery via Google Maps integration
-3.  **Conversational State:** After the initial analysis, the history is used to seamlessly start a persistent chat session, allowing the user to ask contextual follow-up questions about the incident, response procedures, or resource availability.
+3.  **Conversational State:** After the initial analysis, the history is used to seamlessly start a persistent chat session with natural language responses (not JSON). The chat is location-aware and provides country-specific emergency numbers based on the user's coordinates, allowing users to ask contextual follow-up questions about the incident, response procedures, or resource availability.
 
 ### Cloud Run Deployment Challenges & Solutions
 
