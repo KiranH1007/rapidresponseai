@@ -147,7 +147,7 @@ const App: React.FC = () => {
                 onClick={() => setView(View.INFO)}
                 className={`px-4 py-2 text-lg font-medium transition-colors ${view === View.INFO ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-400 hover:text-cyan-300'}`}
             >
-                Project Info
+                How to Use
             </button>
         </div>
         <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden min-h-[600px] flex flex-col">
