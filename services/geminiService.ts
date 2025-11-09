@@ -22,11 +22,12 @@ export const startAnalysisChat = async (
   location: Location
 ): Promise<{ analysis: AnalysisResult; chat: Chat; initialHistory: ChatMessage[] }> => {
   
-  // Get the API key from environment variables when the function is called.
-  const API_KEY = process.env.API_KEY;
+  // Get the API key from Vite environment variables
+  // In Vite, client-side env vars must be prefixed with VITE_ and accessed via import.meta.env
+  const API_KEY = import.meta.env.VITE_API_KEY;
 
   if (!API_KEY) {
-      throw new Error("API_KEY environment variable is not set.");
+      throw new Error("VITE_API_KEY environment variable is not set. Please set it during the build process.");
   }
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });

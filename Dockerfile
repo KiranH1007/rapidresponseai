@@ -17,6 +17,11 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application source code
 COPY . .
 
+# Accept API_KEY as build argument
+# Note: This will be baked into the client bundle. For production, consider using a backend proxy.
+ARG VITE_API_KEY
+ENV VITE_API_KEY=$VITE_API_KEY
+
 # Build the application (assuming you have a "build" script in package.json)
 # This is common for Vite projects: "build": "vite build"
 RUN pnpm run build
