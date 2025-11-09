@@ -219,17 +219,14 @@ This flow details how the application is built, secured, and deployed on Google 
    
     To successfully build the image locally
     ```bash
-    # Build the dockerfile 
-    docker build  -t rapidresponseai .
+    # Build dockerfile with API key
+    docker build --build-arg VITE_API_KEY="YOUR_ACTUAL_GEMINI_API_KEY" -t rapidresponseai .
     ```
     
 3. **Run the docker locally:**
    
    To successfully run locally, you must pass your Gemini API Key as a build argument during the Docker build process:
    ```bash
-   # Build with API key
-   docker build --build-arg VITE_API_KEY="YOUR_ACTUAL_GEMINI_API_KEY" -t rapidresponseai .
-   
    # Run the application in the Docker container for local testing
    docker run -p 3001:3001 --rm rapidresponseai
    ```
