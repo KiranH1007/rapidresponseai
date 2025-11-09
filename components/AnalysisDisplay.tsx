@@ -6,6 +6,8 @@ import { HospitalIcon } from './icons/HospitalIcon';
 import { FollowUpChat } from './FollowUpChat';
 import { CopyIcon } from './icons/CopyIcon';
 import { ExternalLinkIcon } from './icons/ExternalLinkIcon';
+import { FireExtinguisherIcon } from './icons/FireExtinguisherIcon';
+import { SirenIcon } from './icons/SirenIcon';
 
 interface AnalysisDisplayProps {
   result: AnalysisResult;
@@ -18,12 +20,22 @@ interface AnalysisDisplayProps {
 const severityStyles = {
     'Minor': 'bg-green-500/20 text-green-300 border-green-500',
     'Moderate': 'bg-yellow-500/20 text-yellow-300 border-yellow-500',
+    'Severe': 'bg-orange-500/20 text-orange-300 border-orange-500',
     'Critical': 'bg-red-500/20 text-red-300 border-red-500',
 };
+
+const resourceInfoMap = {
+    'Hospital': { icon: <HospitalIcon className="h-6 w-6 mr-2" />, title: 'Nearby Hospitals' },
+    'Ambulance': { icon: <HospitalIcon className="h-6 w-6 mr-2" />, title: 'Nearby Hospitals / Ambulance Services' },
+    'Fire_Rescue': { icon: <FireExtinguisherIcon className="h-6 w-6 mr-2" />, title: 'Nearby Fire Stations' },
+    'Police': { icon: <SirenIcon className="h-6 w-6 mr-2" />, title: 'Nearby Police Stations' },
+};
+
 
 export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, onReset, chatHistory, onSendMessage, isChatLoading }) => {
   const severityClass = severityStyles[result.severity] || 'bg-gray-500/20 text-gray-300';
   const [isCopied, setIsCopied] = useState(false);
+  const resourceInfo = resourceInfoMap[result.resourceType] || resourceInfoMap['Hospital'];
 
   const handleCopy = () => {
     navigator.clipboard.writeText(result.summary);
@@ -62,10 +74,10 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, onRese
               <div>
                   <h3 className="text-lg font-semibold text-cyan-300 mb-2 flex items-center">
                       <ClipboardCheckIcon className="h-6 w-6 mr-2" />
-                      Immediate Actions
+                      Immediate Actions to Take
                   </h3>
                   <ul className="list-disc list-inside space-y-2 pl-2 text-slate-300 bg-slate-700/50 p-4 rounded-md border border-slate-600">
-                      {result.immediateActions.map((action, index) => (
+                      {result.actionList.map((action, index) => (
                           <li key={index}>{action}</li>
                       ))}
                   </ul>
@@ -73,27 +85,28 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ result, onRese
 
               <div>
                   <h3 className="text-lg font-semibold text-cyan-300 mb-2 flex items-center">
-                      <HospitalIcon className="h-6 w-6 mr-2" />
-                      Nearby Hospitals
+                      {resourceInfo.icon}
+                      {resourceInfo.title}
                   </h3>
                   <div className="space-y-3">
-                      {result.nearbyHospitals.map((hospital, index) => (
+                      {result.nearbyResources.length > 0 ? result.nearbyResources.map((resource, index) => (
                           <a 
                             key={index} 
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${hospital.name}, ${hospital.address}`)}`}
+                            href={resource.uri}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block bg-slate-700/50 p-3 rounded-md border border-slate-600 hover:bg-slate-700/80 hover:border-cyan-500/50 transition-all group"
                           >
                               <div className="flex justify-between items-center">
                                 <div>
-                                    <p className="font-semibold text-slate-100">{hospital.name}</p>
-                                    <p className="text-sm text-slate-400">{hospital.address}</p>
+                                    <p className="font-semibold text-slate-100">{resource.title}</p>
                                 </div>
                                 <ExternalLinkIcon className="h-5 w-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
                               </div>
                           </a>
-                      ))}
+                      )) : (
+                        <p className="text-slate-400 text-sm bg-slate-700/50 p-3 rounded-md border border-slate-600">Could not find nearby resources.</p>
+                      )}
                   </div>
               </div>
           </div>

@@ -1,13 +1,14 @@
-export interface Hospital {
-  name: string;
-  address: string;
+export interface NearbyResource {
+  title: string;
+  uri: string;
 }
 
 export interface AnalysisResult {
-  severity: 'Minor' | 'Moderate' | 'Critical';
+  severity: 'Minor' | 'Moderate' | 'Severe' | 'Critical';
   summary: string;
-  immediateActions: string[];
-  nearbyHospitals: Hospital[];
+  actionList: string[];
+  resourceType: 'Hospital' | 'Fire_Rescue' | 'Police' | 'Ambulance';
+  nearbyResources: NearbyResource[];
 }
 
 export interface Location {
