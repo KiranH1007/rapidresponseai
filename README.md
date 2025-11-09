@@ -100,6 +100,89 @@ The deployment involved resolving several common conflicts between front-end bui
 
 ## ⚙️ Technical Architecture & Setup
 
+### System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Frontend Application"
+        A[React + TypeScript] --> B[Vite Build Tool]
+        B --> C[Tailwind CSS]
+        C --> D[Static Assets]
+    end
+    
+    subgraph "Build & Deployment"
+        E[Source Code] --> F[Docker Multi-Stage Build]
+        F --> G[Node.js 20 Alpine]
+        G --> H[pnpm Install]
+        H --> I[Vite Build]
+        I --> J[Docker Image]
+        J --> K[Artifact Registry]
+    end
+    
+    subgraph "Google Cloud Platform"
+        K --> L[Cloud Run]
+        M[Secret Manager] --> L
+        L --> N[Static File Server]
+    end
+    
+    subgraph "Runtime Flow"
+        O[User Browser] -->|HTTPS| L
+        L -->|API Calls| P[Google Gemini 2.5 Flash]
+        P -->|JSON Response| L
+        L -->|Location Query| Q[Google Maps API]
+        Q -->|Nearby Resources| L
+        L -->|HTML/CSS/JS| O
+    end
+    
+    style A fill:#61dafb
+    style B fill:#646cff
+    style C fill:#06b6d4
+    style P fill:#4285f4
+    style Q fill:#4285f4
+    style L fill:#34a853
+    style M fill:#ea4335
+```
+
+### Technology Stack Architecture
+
+```mermaid
+graph LR
+    subgraph "Client-Side Technologies"
+        A[React 19.2] --> B[TypeScript 5.5]
+        B --> C[Vite 5.4]
+        C --> D[Tailwind CSS 3.4]
+        D --> E[Web Speech API]
+    end
+    
+    subgraph "Build & Package Management"
+        F[pnpm] --> G[Node.js 20]
+        G --> H[Docker Multi-Stage]
+        H --> I[Alpine Linux]
+    end
+    
+    subgraph "AI & APIs"
+        J[Google Gemini API] --> K[Gemini 2.5 Flash Model]
+        J --> L[Google Maps Grounding]
+        J --> M[Structured JSON Output]
+    end
+    
+    subgraph "Cloud Infrastructure"
+        N[Google Cloud Run] --> O[Serverless Container]
+        P[Artifact Registry] --> N
+        Q[Secret Manager] --> N
+        R[Cloud Build] --> P
+    end
+    
+    A --> J
+    N --> J
+    N --> L
+    
+    style A fill:#61dafb
+    style J fill:#4285f4
+    style N fill:#34a853
+    style Q fill:#ea4335
+```
+
 **1. ⚙️ Deployment Flow (Build and Setup)**
 
 This flow details how the application is built, secured, and deployed on Google Cloud.
