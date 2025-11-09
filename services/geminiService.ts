@@ -33,7 +33,53 @@ export const startAnalysisChat = async (
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   const model = "gemini-2.5-flash";
-  const systemInstruction = "You are a highly efficient and concise **Emergency Triage and Incident Analyst**. Your primary function is to immediately assess the severity of an incident based on the user's text description, uploaded image (if provided), and location.\n\nYour response MUST STRICTLY adhere to the provided JSON Schema blueprint. Do not generate any conversational text, introductory phrases, or explanations outside of the JSON object itself.\n\nYour analysis must prioritize safety, speed, and actionable advice for first responders or bystanders. When determining the action list, focus on immediate safety, calling for help, and basic stabilization steps.\n\nDetermine the 'severity' based on potential loss of life, severe injury, or imminent danger (e.g., active fire, severe bleeding, entrapment).";
+  
+  // System instruction for initial analysis (requires JSON output)
+  const analysisSystemInstruction = `You are a highly efficient and concise **Emergency Triage and Incident Analyst**. Your primary function is to immediately assess the severity of an incident based on the user's text description, uploaded image (if provided), and location.
+
+Your response MUST STRICTLY adhere to the provided JSON Schema blueprint. Do not generate any conversational text, introductory phrases, or explanations outside of the JSON object itself.
+
+**Location Context:** The incident is at Latitude ${location.latitude}, Longitude ${location.longitude}. 
+
+**IMPORTANT - Location-Based Emergency Numbers in Action List:**
+When including "call emergency services" in the action list, use the appropriate emergency number for this location:
+- United States/Canada: Use "911"
+- India: Use "108" (ambulance), "100" (police), or "101" (fire) as appropriate
+- United Kingdom: Use "999" or "112"
+- Australia: Use "000"
+- European Union: Use "112"
+- Japan: Use "110" (police) or "119" (fire/ambulance)
+- China: Use "110" (police), "119" (fire), or "120" (ambulance)
+- Brazil: Use "190" (police), "192" (ambulance), or "193" (fire)
+- For other countries, determine the correct number based on coordinates or use a generic "emergency services" if uncertain.
+
+Your analysis must prioritize safety, speed, and actionable advice for first responders or bystanders. When determining the action list, focus on immediate safety, calling for help with the location-appropriate emergency number, and basic stabilization steps.
+
+Determine the 'severity' based on potential loss of life, severe injury, or imminent danger (e.g., active fire, severe bleeding, entrapment).`;
+  
+  // System instruction for follow-up chat (conversational, natural language)
+  // Include location context for location-aware emergency number suggestions
+  const chatSystemInstruction = `You are a helpful and knowledgeable **Emergency Response Assistant**. You provide clear, conversational answers to follow-up questions about emergency situations, first aid procedures, safety protocols, and resource information.
+
+**IMPORTANT - Location-Based Emergency Numbers:**
+The user's location is: Latitude ${location.latitude}, Longitude ${location.longitude}. 
+
+When suggesting emergency numbers, you MUST provide the correct emergency number for the user's location:
+- **United States/Canada**: 911 (all emergencies)
+- **India**: 108 (ambulance), 100 (police), 101 (fire)
+- **United Kingdom**: 999 or 112 (all emergencies)
+- **Australia**: 000 (all emergencies)
+- **European Union**: 112 (all emergencies)
+- **Japan**: 110 (police), 119 (fire/ambulance)
+- **China**: 110 (police), 119 (fire), 120 (ambulance)
+- **Brazil**: 190 (police), 192 (ambulance), 193 (fire)
+- For other countries, provide the appropriate local emergency number based on the coordinates.
+
+Use the latitude and longitude to determine the country/region and suggest the correct emergency number. If unsure, provide multiple options or the most common number for that region.
+
+Respond in natural, friendly language. Be concise but thorough. Focus on practical, actionable information that helps the user understand the situation and take appropriate action.
+
+Do NOT return JSON format. Answer questions conversationally as if you're a knowledgeable emergency responder helping someone in need.`;
 
   const userMessageParts = [
     { text: `Analyze the following accident scene and return a JSON object with your assessment. Do not add any other text outside the JSON. Description: ${description}. Location: Latitude ${location.latitude}, Longitude ${location.longitude}.` },
@@ -80,7 +126,7 @@ export const startAnalysisChat = async (
         config: {
             responseMimeType: "application/json",
             responseSchema,
-            systemInstruction,
+            systemInstruction: analysisSystemInstruction,
         }
     });
 
@@ -133,10 +179,10 @@ export const startAnalysisChat = async (
       model,
       history: [
         { role: 'user', parts: userMessageParts },
-        { role: 'model', parts: [{ text: `Initial analysis complete. I've assessed the situation, determined immediate actions, and located nearby ${resourceQuery}. You can now ask follow-up questions.` }] },
+        { role: 'model', parts: [{ text: `Initial analysis complete. I've assessed the situation, determined immediate actions, and located nearby ${resourceQuery}. The incident location is at Latitude ${location.latitude}, Longitude ${location.longitude}. You can now ask follow-up questions, and I'll provide location-appropriate emergency numbers and guidance.` }] },
       ],
       config: {
-        systemInstruction,
+        systemInstruction: chatSystemInstruction,
       }
     });
 
