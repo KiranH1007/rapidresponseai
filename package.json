@@ -9,9 +9,14 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "serve": "^14.2.3"
+    "serve": "^14.2.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
