@@ -25,6 +25,10 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [showManualLocation, setShowManualLocation] = useState<boolean>(false);
+  const [manualLat, setManualLat] = useState<string>('');
+  const [manualLng, setManualLng] = useState<string>('');
   const recognitionRef = useRef(recognition);
 
   useEffect(() => {
@@ -71,8 +75,45 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      processImageFile(file);
+    }
+  };
+
+  const processImageFile = (file: File) => {
+    // FR-101: Only accept JPEG, PNG, WebP
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a JPEG, PNG, or WebP image.');
+      return;
+    }
+    // FR edge case: Max 10MB display / 50MB accepted
+    if (file.size > 50 * 1024 * 1024) {
+      alert('Image must be under 50 MB.');
+      return;
+    }
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  // FR-106: Actual drag-and-drop support
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processImageFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -86,13 +127,27 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
           longitude: position.coords.longitude,
         });
         setIsLocating(false);
+        setShowManualLocation(false);
       },
       (error) => {
         setLocationError(error.message);
         setIsLocating(false);
+        // FR-105: Show manual fallback when geolocation is denied
+        setShowManualLocation(true);
       }
     );
   }, []);
+
+  const handleManualLocationSubmit = () => {
+    const lat = parseFloat(manualLat);
+    const lng = parseFloat(manualLng);
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setLocationError('Please enter valid coordinates (Lat: -90 to 90, Lng: -180 to 180)');
+      return;
+    }
+    setLocation({ latitude: lat, longitude: lng });
+    setLocationError(null);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +190,14 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
         <label className="block text-sm font-medium text-slate-300 mb-2">
           2. Upload a photo (optional)
         </label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-600 border-dashed rounded-md">
+        <div 
+          className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors ${
+            isDragging ? 'border-cyan-400 bg-cyan-500/10' : 'border-slate-600'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
             <div className="space-y-1 text-center">
                 {imagePreview ? (
                     <img src={imagePreview} alt="Scene preview" className="mx-auto h-32 w-auto rounded-md object-cover" />
@@ -145,11 +207,11 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
                 <div className="flex text-sm text-slate-400">
                     <label htmlFor="file-upload" className="relative cursor-pointer bg-slate-800 rounded-md font-medium text-cyan-400 hover:text-cyan-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-slate-800 focus-within:ring-cyan-500">
                         <span>Upload a file</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-slate-500">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs text-slate-500">JPEG, PNG, WebP up to 50MB</p>
             </div>
         </div>
       </div>
@@ -167,6 +229,45 @@ export const EmergencyForm: React.FC<EmergencyFormProps> = ({ onSubmit }) => {
         )}
         {locationError && (
             <p className="mt-2 text-sm text-red-400">Location Error: {locationError}</p>
+        )}
+        {/* FR-105: Manual coordinate entry fallback */}
+        {showManualLocation && !location && (
+            <div className="mt-3 p-3 bg-slate-700/50 rounded-md border border-slate-600 space-y-3">
+                <p className="text-xs text-yellow-400">📍 Geolocation unavailable. Enter coordinates manually:</p>
+                <div className="flex gap-3">
+                    <div className="flex-1">
+                        <label htmlFor="manual-lat" className="block text-xs text-slate-400 mb-1">Latitude</label>
+                        <input
+                            id="manual-lat"
+                            type="number"
+                            step="any"
+                            placeholder="e.g., 12.9716"
+                            value={manualLat}
+                            onChange={(e) => setManualLat(e.target.value)}
+                            className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-sm text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <label htmlFor="manual-lng" className="block text-xs text-slate-400 mb-1">Longitude</label>
+                        <input
+                            id="manual-lng"
+                            type="number"
+                            step="any"
+                            placeholder="e.g., 77.5946"
+                            value={manualLng}
+                            onChange={(e) => setManualLng(e.target.value)}
+                            className="w-full bg-slate-600 border border-slate-500 rounded-md px-3 py-2 text-sm text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        />
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleManualLocationSubmit}
+                    className="w-full px-4 py-2 text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 transition-colors"
+                >
+                    Set Location Manually
+                </button>
+            </div>
         )}
       </div>
 

@@ -1,0 +1,32 @@
+# AI Assistant Guidelines for Rapid Response AI
+
+You are acting as an expert Senior Engineer at a MAANG-tier company working on this enterprise repository.
+Always enforce best practices, secure coding, performance optimization, and rigorous testing methodologies.
+
+## Git Standards
+When tasked with generating a git commit message or executing a commit, you MUST adhere to the following rules:
+1. **Format**: Follow the Conventional Commits standard: `<type>(<scope>): <subject>`
+2. **Length Constraints**: Limit the first subject line to 50 characters maximum.
+3. **Tone**: Use the imperative mood for the subject line (e.g., "Fix bug" not "Fixed bug"). Do NOT end the subject line with a period.
+4. **Body**: If additional context is needed, separate the subject and body with a blank line. Wrap the body text at 72 characters per line. Explain *what* and *why*, not *how*.
+5. **Types**: Only use one of: `feat`, `fix`, `refactor`, `style`, `docs`, `test`, `chore`, `perf`, `ci`.
+
+*Example of a correct commit:*
+```
+feat(auth): Ensure secrets are masked in proxy logs
+
+Replaces raw tokens in the logger pipeline with masked placeholders
+to prevent credential leakage and comply with security audits.
+```
+
+## Code Generation Standards
+1. **Architecture**: Adhere to clean architecture patterns. Do not write monolithic components or functions.
+2. **Security First**: Validate all inputs, sanitize data, and never hardcode secrets. Always use `process.env`.
+3. **TypeScript**: Prefer strict typing interfaces over `any`. Provide inline comments for complex domain logic.
+4. **Resilience**: Applications must have robust error handling, proper fallbacks, and comprehensive logging.
+
+## Branch Naming Conventions
+When generating or suggesting branch names:
+- Use `feat/<ticket>-<description>` or `feat/<description>` for new features.
+- Use `fix/<ticket>-<description>` or `fix/<description>` for bug fixes.
+- Keep the description short, hyphen-separated, and all lowercase.
